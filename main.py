@@ -21,6 +21,14 @@ COLORE_TRAIETTORIA       = 'white'
 COLORE_BOMBAROLO         = 'brown1'
 COLORE_BOMBAROLO_RAGGIO  = 'coral'
 
+COLORE_CECCHINO          = 'gray'
+PUNTI_VITA_CECCHINO      = 1 # PV
+RAGGIO_CECCHINO          = 200.0 # px
+DANNO_CECCHINO           = 100 # PV
+TURNI_RICARICA_CECCHINO  = 3
+
+COLORE_ARCIERE_MAGICO    = 'limegreen'
+
 class Personaggio:
     def __init__(self, x, y, punti_vita=PUNTI_VITA_PERSONAGGIO):
         self.punti_vita = punti_vita
@@ -129,6 +137,46 @@ class Bombarolo(Personaggio):
             return True
         return False
 
+class Cecchino(Personaggio):
+    def __init__(self, x, y, punti_vita=PUNTI_VITA_CECCHINO):
+        super().__init__(x, y, punti_vita)
+        self.turni_ricarica = 0
+
+    def _disegna_forma(self):
+        draw_equi_triangle(self.x, self.y, COLORE_CECCHINO, 2.0 * DIM_PERSONAGGIO)
+
+    def turno(self, personaggi):
+        if self.is_vivo():
+            if self.turni_ricarica == 0:
+                if not self.attacca(personaggi):
+                    self.muovi()
+            else:
+                self.turni_ricarica -= 1
+
+    def attacca(self, personaggi):
+        altri = self.get_piu_vicini_di(personaggi, RAGGIO_CECCHINO)
+        if len(altri) > 0:
+            altro = altri[randint(0, len(altri) - 1)]
+            draw_line(self.x, self.y, COLORE_TRAIETTORIA, altro.x, altro.y)
+            altro.ricevi_danno(DANNO_CECCHINO)
+            self.turni_ricarica = TURNI_RICARICA_CECCHINO
+            return True
+        return False
+
+class ArciereMagico(Arciere):
+    def __init__(self, x, y, punti_vita=PUNTI_VITA_ARCIERE):
+        super().__init__(x, y, punti_vita)
+
+    def _disegna_forma(self):
+        draw_rect(self.x, self.y, COLORE_ARCIERE_MAGICO, 1.6 * DIM_PERSONAGGIO, 1.6 * DIM_PERSONAGGIO)
+
+    def ricevi_danno(self, danno):
+        super().ricevi_danno(danno)
+        if self.is_vivo():
+            draw_rect(self.x, self.y, COLORE_ARCIERE_MAGICO, 1.6 * DIM_PERSONAGGIO, 1.6 * DIM_PERSONAGGIO, 1)
+            self.x = DIM_PERSONAGGIO + random() * (SCREEN_WIDTH - DIM_PERSONAGGIO - 1)
+            self.y = DIM_PERSONAGGIO + random() * (SCREEN_HEIGHT - DIM_PERSONAGGIO - 1)
+
 # Funzioni di gestione del gioco
 def crea_personaggi(n):
     personaggi = []
@@ -137,13 +185,17 @@ def crea_personaggi(n):
         x = DIM_PERSONAGGIO + random() * (SCREEN_WIDTH - DIM_PERSONAGGIO - 1)
         y = DIM_PERSONAGGIO + random() * (SCREEN_HEIGHT - DIM_PERSONAGGIO - 1)
         
-        match randint(1, 3): # Tira un D3
+        match randint(1, 5): # Tira un D5
             case 1: # Crea un personaggio semplice
                 p = Personaggio(x, y)
             case 2: # Crea un arciere
                 p = Arciere(x, y)
             case 3: # Crea un bombarolo
                 p = Bombarolo(x, y)
+            case 4: # Crea un cecchino
+                p = Cecchino(x, y)
+            case 5: # Crea un arciere magico
+                p = ArciereMagico(x, y)
         personaggi.append(p)
     return personaggi
 
