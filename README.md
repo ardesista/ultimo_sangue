@@ -23,7 +23,7 @@ All'interno del proprio turno, un personaggio può spostarsi di **15 unità**. P
 1. il personaggio tocca il bordo dell'arena
 2. il risultato del lancio di un dado a 12 facce è 1 (~8.3% dei casi)
 
-Se una di queste eventualità si verifica, la direzione di spostamento cambia di un angolo compreso tra -45° e +45°.
+Se una di queste eventualità si verifica, la direzione di spostamento cambia casualmente di un angolo compreso tra -45° e +45°.
 
 ## Bonus
 
